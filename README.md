@@ -1,4 +1,4 @@
-# Twitter Bio MRR
+# Twitter Bio Monthly Revenue
 
 This is a simple Node script which calculates your total monthly revenue from Stripe (using payouts) and then uses that to calculate how close you are to your MRR goal and then updates your Twitter bio (location).
 
