@@ -3,11 +3,6 @@ const stripe = require("stripe")(process.env.STRIPE_API_KEY)
 const { getUnixTime, endOfMonth, startOfMonth } = require("date-fns")
 
 const Twitter = require("twitter")
-// NOTE: doesn't seem like stripe-node supports Deno yet sadly
-// https://github.com/stripe/stripe-node/issues/997
-// const stripe = new Stripe(
-//   "pk_test_51INJxZFKmQcPTDII3uCy73sp4ZQseDhWCM02QmmyFh2J0lcWibnXqC8XjkfOHmHGIgi1wIeYaHw8sY2nxHo1sBUt00p07FPvr8"
-// )
 
 // Remember January is 0
 // Get total for current month
@@ -19,8 +14,6 @@ const client = new Twitter({
   access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 })
-
-// credit here: https://dev.to/deta/how-i-used-deta-and-the-twitter-api-to-update-my-profile-name-with-my-follower-count-tom-scott-style-l1j
 
 async function getStripeRevenue(startRangeTimestamp, endRangeTimestamp) {
   const payouts = await stripe.payouts.list({
@@ -91,6 +84,7 @@ function kFormatter(num) {
     location: mrrSquares,
   }
 
+  // credit here: https://dev.to/deta/how-i-used-deta-and-the-twitter-api-to-update-my-profile-name-with-my-follower-count-tom-scott-style-l1j
   client.post("account/update_profile", params, (err) => {
     if (err) throw new Error("Failed to update profile")
     console.log("🎉 Success! Updated Twitter bio/location")
