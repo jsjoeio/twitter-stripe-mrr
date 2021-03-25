@@ -14,6 +14,10 @@ const client = new Twitter({
   access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 })
+const iconsTypes = {
+  'square': { green: '🟩', yellow: '🟨', gray: '⬜', },
+  'circle': { green: '🟢', yellow: '🟡', gray: '⚪', }
+}
 
 async function getStripeRevenue(startRangeTimestamp, endRangeTimestamp) {
   const payouts = await stripe.payouts.list({
@@ -30,30 +34,31 @@ async function getStripeRevenue(startRangeTimestamp, endRangeTimestamp) {
 
 /**
  * @param {number} n - the progress towards goal out of 10
+ * @param {string} icon - the progress Icon (square or circle)
  * @example there are ten squares total, and n is 5, then it should return
- * "MRR: 0 🟩🟩🟩🟩🟩🟨⬜⬜⬜⬜  5K"
+ * "MRR: 0 🟩🟩🟩🟩🟩🟨⬜⬜⬜⬜  5K" or "MRR: 0 🟢🟢🟢🟢🟢🟡⚪⚪⚪⚪  5K"
  */
-function buildMRRSquaresForTwitter(n, goal) {
+function buildMRRSquaresForTwitter(n, goal, icon = 'square') {
   const GOAL_AS_K = kFormatter(goal)
   let SQUARES = ""
   let count = 0
 
   // Add green squares
   for (let i = 0; i < n; i++) {
-    SQUARES += "🟩"
+    SQUARES += iconsTypes[icon].green
     count += 1
   }
 
   // Add one after the last green for progress
   if (count !== 10) {
-    SQUARES += "🟨"
+    SQUARES += iconsTypes[icon].yellow
     count += 1
   }
 
   // Fill the rest with white squares
   if (count !== 10) {
     for (let i = count; i < 10; i++) {
-      SQUARES += "⬜"
+      SQUARES += iconsTypes[icon].gray
       count += 1
     }
   }
