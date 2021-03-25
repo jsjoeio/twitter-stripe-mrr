@@ -16,6 +16,7 @@ const client = new Twitter({
 })
 
 async function getStripeRevenue(startRangeTimestamp, endRangeTimestamp) {
+  // credit here: https://stackoverflow.com/a/53775391/3015595
   const payouts = await stripe.payouts.list({
     created: { gte: startRangeTimestamp, lte: endRangeTimestamp },
     limit: 100, // Maximum limit (10 is default)
