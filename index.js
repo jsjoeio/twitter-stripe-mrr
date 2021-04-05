@@ -21,13 +21,16 @@ const iconsTypes = {
 
 async function getStripeRevenue(startRangeTimestamp, endRangeTimestamp) {
   // credit here: https://stackoverflow.com/a/53775391/3015595
-  const payouts = await stripe.payouts.list({
+  const payoutsInCents = await stripe.payouts.list({
     created: { gte: startRangeTimestamp, lte: endRangeTimestamp },
     limit: 100, // Maximum limit (10 is default)
   })
 
-  const amountTotal = payouts.data.reduce((a, b) => ({
-    amount: a.amount + b.amount,
+  // payouts returned by Stripe API are in cents, so we divide by 100
+  const payouts = payoutsInCents.data.map(function(x) { return x.amount / 100 } )
+
+  const amountTotal = payouts.reduce((a, b) => ({
+    amount: a + b,
   })).amount
 
   return amountTotal
