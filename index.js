@@ -8,12 +8,6 @@ const Twitter = require("twitter")
 // Get total for current month
 const startRangeTimestamp = getUnixTime(new Date(startOfMonth(new Date())))
 const endRangeTimestamp = getUnixTime(new Date(endOfMonth(new Date())))
-const client = new Twitter({
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
-  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
-})
 const iconsTypes = {
   square: { green: "🟩", yellow: "🟨", gray: "⬜" },
   circle: { green: "🟢", yellow: "🟡", gray: "⚪" },
@@ -21,7 +15,7 @@ const iconsTypes = {
 
 const EXPECTED_ENV_VARS = [
   "TWITTER_CONSUMER_KEY",
-  "TWITTER_CONSUMER_KEY",
+  "TWITTER_CONSUMER_SECRET",
   "TWITTER_ACCESS_TOKEN_KEY",
   "TWITTER_ACCESS_TOKEN_SECRET",
   "STRIPE_API_KEY",
@@ -109,11 +103,37 @@ async function removeMe() {
 async function main() {
   try {
     // Verify that all the environment variables are set
+    console.log(`LOG: Verifying environment variables...\n`)
     const ACTUAL_ENV_VARS = EXPECTED_ENV_VARS.map((envVar) =>
       getEnvironmentVariable(envVar)
     )
 
-    // validate Twitter API
+    if (EXPECTED_ENV_VARS.length === ACTUAL_ENV_VARS.length) {
+      console.log(`\nLOG: Found all expected environment variables\n`)
+    }
+
+    // Use array destructuring to grab the environment variables
+    const [
+      TWITTER_CONSUMER_KEY,
+      TWITTER_CONSUMER_SECRET,
+      TWITTER_ACCESS_TOKEN_KEY,
+      TWITTER_ACCESS_TOKEN_SECRET,
+      STRIPE_API_KEY,
+    ] = ACTUAL_ENV_VARS
+
+    // Verify that the Twitter API actually works using our credentials
+    console.log(`LOG: Verifying that the Twitter API is working\n`)
+
+    // Create the Twitter client
+    const twitter = new Twitter({
+      consumer_key: TWITTER_CONSUMER_KEY,
+      consumer_secret: TWITTER_CONSUMER_SECRET,
+      access_token_key: TWITTER_ACCESS_TOKEN_KEY,
+      access_token_secret: TWITTER_ACCESS_TOKEN_SECRET,
+    })
+
+    await verifyTwitterCredentials(twitter)
+
     // validate Stripe API
   } catch (error) {
     console.error(error)
@@ -151,6 +171,27 @@ function kFormatter(num) {
   return Math.abs(num) > 999
     ? Math.sign(num) * (Math.abs(num) / 1000).toFixed(1) + "K"
     : Math.sign(num) * Math.abs(num)
+}
+
+/**
+ * Verifies your Twitter credentials
+ * @param client The Twitter client
+ * @returns {undefined}
+ *
+ * See this {@link https://dev.to/deta/how-i-used-deta-and-the-twitter-api-to-update-my-profile-name-with-my-follower-count-tom-scott-style-l1j| Twitter tutorial} for more information about working with the Twitter API
+ */
+async function verifyTwitterCredentials(client) {
+  return await client.get("account/verify_credentials", (err, res) => {
+    if (err) {
+      console.error(err)
+      throw new Error(`❌ ERROR: could not verify your Twitter credentials`)
+    }
+    if (res) {
+      const followerCount = res.followers_count
+      console.log(`✅ Verified your Twitter credentials using follower count.`)
+      console.log(`#️⃣  Your current follower count is ${followerCount}`)
+    }
+  })
 }
 
 //////////////////////////////
