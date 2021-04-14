@@ -10,10 +10,33 @@ const EXPECTED_ENV_VARS = [
   "STRIPE_API_KEY",
 ]
 
+let dryRun = false
+const args = process.argv.slice(2)
+if (args.includes("--dry-run")) {
+  dryRun = true
+}
+// use --dry-run here
+// credit: https://stackoverflow.com/a/5767589/3015595
+
+//////////////////////////////
+// Main script call
+/////////////////////////////
+
+main(dryRun)
+
+//////////////////////////////
+// Main script call (end)
+/////////////////////////////
+
 /**
  * The main function which starts the script
+ *
+ * @param {boolean?} dryRun optional param to run the script without updating bio/location on Twitter
+ *
+ * @returns {undefined}
  */
-async function main() {
+async function main(dryRun = false) {
+  const DRY_RUN_IS_ENABLED = dryRun
   try {
     // Verify that all the environment variables are set
     console.log(`LOG: Verifying environment variables...\n`)
@@ -55,6 +78,7 @@ async function main() {
     const endRangeTimestamp = getUnixTime(new Date(endOfMonth(new Date())))
 
     const totalRevenueForMonth = await getStripeRevenue(
+      stripe,
       startRangeTimestamp,
       endRangeTimestamp
     )
@@ -73,18 +97,20 @@ async function main() {
     const twitterProfileParams = {
       location: mrrIcons,
     }
-    await updateTwitterBioLocation(twitterProfileParams)
+
+    if (DRY_RUN_IS_ENABLED) {
+      console.log(`\nLOG: Script run with --dry-run`)
+      console.log(`LOG: Skipping Twitter bio/location update`)
+      return 0
+    }
+
+    await updateTwitterBioLocation(twitter, twitterProfileParams)
+
+    return 0
   } catch (error) {
     console.error(error)
   }
 }
-
-var args = process.argv.slice(2)
-console.log("hello args", args)
-// use --dry-run here
-// credit: https://stackoverflow.com/a/5767589/3015595
-
-main()
 
 //////////////////////////////
 // Helper Functions
@@ -140,20 +166,22 @@ async function verifyTwitterCredentials(client) {
 
 /**
  * Updates the location in the Twitter bio
- * @param {{location: string}} twitterProfileParams the twitter profile parameters
+ *
+ * @param {any} twitter - the Twitter client
+ * @param {{location: string}} twitterProfileParams - the twitter profile parameters
  * @returns {undefined}
  */
-async function updateTwitterBioLocation(twitterProfileParams) {
+async function updateTwitterBioLocation(twitter, twitterProfileParams) {
   // credit here: https://dev.to/deta/how-i-used-deta-and-the-twitter-api-to-update-my-profile-name-with-my-follower-count-tom-scott-style-l1j
-  return await client.post(
+  return await twitter.post(
     "account/update_profile",
     twitterProfileParams,
     (err) => {
       if (err) {
         console.error(err)
-        throw new Error(`❌ ERROR: Failed to update Twitter bio location.`)
+        throw new Error(`\n❌ ERROR: Failed to update Twitter bio location.`)
       }
-      console.log("🎉 Success! Updated Twitter bio/location")
+      console.log("\n🎉 Success! Updated Twitter bio/location")
     }
   )
 }
@@ -166,7 +194,7 @@ async function updateTwitterBioLocation(twitterProfileParams) {
  * See this {@link https://stripe.com/docs/development/quickstart| Stripe tutorial} for more information
  */
 async function verifyStripeCredentials(client) {
-  return await stripe.paymentIntents.create(
+  return await client.paymentIntents.create(
     {
       amount: 1000,
       currency: "usd",
@@ -233,11 +261,16 @@ function buildMRRIconsForTwitter(n, goal, icon = "square") {
 /**
  * Calculates the total monthly revenue in Stripe
  *
+ * @param {any} stripe - the stripe client
  * @param {number} startRangeTimestamp - the start range of the month
  * @param {number} endRangeTimestamp - the end range of the month
  * @returns {number} the total
  */
-async function getStripeRevenue(startRangeTimestamp, endRangeTimestamp) {
+async function getStripeRevenue(
+  stripe,
+  startRangeTimestamp,
+  endRangeTimestamp
+) {
   // credit here: https://stackoverflow.com/a/53775391/3015595
   const payoutsInCents = await stripe.payouts.list({
     created: { gte: startRangeTimestamp, lte: endRangeTimestamp },
