@@ -4,11 +4,6 @@ const { getUnixTime, endOfMonth, startOfMonth } = require("date-fns")
 
 const Twitter = require("twitter")
 
-// Remember January is 0
-// Get total for current month
-const startRangeTimestamp = getUnixTime(new Date(startOfMonth(new Date())))
-const endRangeTimestamp = getUnixTime(new Date(endOfMonth(new Date())))
-
 const EXPECTED_ENV_VARS = [
   "TWITTER_CONSUMER_KEY",
   "TWITTER_CONSUMER_SECRET",
@@ -17,31 +12,7 @@ const EXPECTED_ENV_VARS = [
   "STRIPE_API_KEY",
 ]
 
-async function getStripeRevenue(startRangeTimestamp, endRangeTimestamp) {
-  // credit here: https://stackoverflow.com/a/53775391/3015595
-  const payoutsInCents = await stripe.payouts.list({
-    created: { gte: startRangeTimestamp, lte: endRangeTimestamp },
-    limit: 100, // Maximum limit (10 is default)
-  })
-
-  // payouts returned by Stripe API are in cents, so we divide by 100
-  const payouts = payoutsInCents.data.map(function (x) {
-    return x.amount / 100
-  })
-
-  const amountTotal = payouts.reduce((a, b) => ({
-    amount: a + b,
-  })).amount
-
-  return amountTotal
-}
-
 async function removeMe() {
-  const totalRevenueForMonth = await getStripeRevenue(
-    startRangeTimestamp,
-    endRangeTimestamp
-  )
-
   // let's assume my goal is $5k
   // and there are 10 squares to fill
   const GOAL = 5000
@@ -97,12 +68,38 @@ async function main() {
     const stripe = require("stripe")(STRIPE_API_KEY)
 
     await verifyStripeCredentials(stripe)
-    // validate Stripe API
-    // do the thing!
+    // get Stripe revenue for month (make sure it works)
+    // Remember January is 0
+    // Get total for current month
+    const startRangeTimestamp = getUnixTime(new Date(startOfMonth(new Date())))
+    const endRangeTimestamp = getUnixTime(new Date(endOfMonth(new Date())))
+
+    const totalRevenueForMonth = await getStripeRevenue(
+      startRangeTimestamp,
+      endRangeTimestamp
+    )
+
+    console.log(`💰 Total revenue for month: ${totalRevenueForMonth}`)
+
+    // let's assume my goal is $2k
+    // and there are 10 squares to fill
+    const GOAL = 2000
+    console.log(`\nLOG: Calculating MRR squares using goal of ${GOAL}\n`)
+    const numOfTenRounded = ((totalRevenueForMonth / GOAL) * 10).toPrecision(1)
+
+    const mrrIcons = buildMRRIconsForTwitter(numOfTenRounded, GOAL)
+    console.log(`⬜ ${mrrIcons}`)
+    const params = {
+      location: mrrIcons,
+    }
   } catch (error) {
     console.error(error)
   }
 }
+
+var args = process.argv.slice(2)
+console.log("hello args", args)
+// use --dry-run here
 
 main()
 
@@ -184,7 +181,7 @@ async function verifyStripeCredentials(client) {
           `✅ Verified your Stripe credentials by creating a PaymentIntent.`
         )
         console.log(
-          `💰 A payment intent of ${amount} ${currency.toUpperCase()}`
+          `💰 A payment intent of ${amount} ${currency.toUpperCase()} was created`
         )
       }
     }
@@ -228,6 +225,81 @@ function buildMRRIconsForTwitter(n, goal, icon = "square") {
   }
 
   return `MRR: 0 ${SQUARES} ${GOAL_AS_K}`
+}
+
+/**
+ * Calculates the total monthly revenue in Stripe
+ *
+ * @param {number} startRangeTimestamp - the start range of the month
+ * @param {number} endRangeTimestamp - the end range of the month
+ * @returns {number} the total
+ */
+async function getStripeRevenue(startRangeTimestamp, endRangeTimestamp) {
+  // credit here: https://stackoverflow.com/a/53775391/3015595
+  const payoutsInCents = await stripe.payouts.list({
+    created: { gte: startRangeTimestamp, lte: endRangeTimestamp },
+    limit: 100, // Maximum limit (10 is default)
+  })
+
+  if (!payoutsInCents) {
+    console.log(`LOG: payoutsInCents`, payoutsInCents)
+    console.error(
+      `❌ ERROR: either couldn't get payouts from Stripe or none found for this date range`
+    )
+    console.log(
+      `LOG: This may happen if you run this at the start of the month and there are no payouts yet.`
+    )
+    console.log(
+      `LOG: Try changing the startRangeTimestamp or endRangeTimestamp.`
+    )
+    return 0
+  }
+
+  // payouts returned by Stripe API are in cents, so we divide by 100
+  const payouts = payoutsInCents.data.map((payout) => {
+    return payout.amount / 100
+  })
+
+  if (!payouts) {
+    console.error(
+      `❌ ERROR: Something went wrong converting the payoutsInCents to dollars`
+    )
+    console.log(`LOG: payoutsInCents`, payoutsInCents)
+    console.log(`LOG: payouts`, payouts)
+    return 0
+  }
+
+  const amountTotal = calculateAmountTotal(payouts)
+
+  if (!amountTotal) {
+    console.error(`❌ ERROR: Something went wrong calculating the total amount`)
+    console.log(`LOG: payoutsInCents`, payoutsInCents)
+    console.log(`LOG: payouts`, payouts)
+    console.log(`LOG: amountTotal`, amountTotal)
+    return 0
+  }
+
+  return amountTotal
+}
+
+/**
+ * Calculates the the total monthly amount based on a Stripe payouts list
+ * @param {number}[]} payouts - list of payouts in number
+ * @returns {number} the total
+ */
+function calculateAmountTotal(payouts) {
+  if (payouts.length === 0) {
+    return 0
+  }
+
+  // Some months there may have one payout
+  if (payouts.length === 1) {
+    return payouts[0]
+  }
+
+  return payouts.reduce((a, b) => ({
+    amount: a + b,
+  })).amount
 }
 
 //////////////////////////////
