@@ -113,7 +113,11 @@ To use this script locally, make sure you have the prerequisites and then follow
    ```
 4. Add your API keys to `.env`
 5. Modify the script as needed
-6. Run script
+6. Run script in dry-run mode (doesn't actually post to Twitter):
+   ```sh
+   node index.js --dry-run
+   ```
+7. Run the script and post to Twitter
    ```sh
    node index.js
    ```
