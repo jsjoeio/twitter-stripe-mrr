@@ -1,8 +1,6 @@
 require("dotenv").config()
-const stripe = require("stripe")(process.env.STRIPE_API_KEY)
-const { getUnixTime, endOfMonth, startOfMonth } = require("date-fns")
-
 const Twitter = require("twitter")
+const { getUnixTime, endOfMonth, startOfMonth } = require("date-fns")
 
 const EXPECTED_ENV_VARS = [
   "TWITTER_CONSUMER_KEY",
@@ -11,24 +9,6 @@ const EXPECTED_ENV_VARS = [
   "TWITTER_ACCESS_TOKEN_SECRET",
   "STRIPE_API_KEY",
 ]
-
-async function removeMe() {
-  // let's assume my goal is $5k
-  // and there are 10 squares to fill
-  const GOAL = 5000
-  const numOfTenRounded = ((totalRevenueForMonth / GOAL) * 10).toPrecision(1)
-
-  const mrrSquares = buildMRRIconsForTwitter(numOfTenRounded, GOAL)
-  const params = {
-    location: mrrSquares,
-  }
-
-  // credit here: https://dev.to/deta/how-i-used-deta-and-the-twitter-api-to-update-my-profile-name-with-my-follower-count-tom-scott-style-l1j
-  client.post("account/update_profile", params, (err) => {
-    if (err) throw new Error("Failed to update profile")
-    console.log("🎉 Success! Updated Twitter bio/location")
-  })
-}
 
 /**
  * The main function which starts the script
@@ -89,9 +69,11 @@ async function main() {
 
     const mrrIcons = buildMRRIconsForTwitter(numOfTenRounded, GOAL)
     console.log(`⬜ ${mrrIcons}`)
-    const params = {
+
+    const twitterProfileParams = {
       location: mrrIcons,
     }
+    await updateTwitterBioLocation(twitterProfileParams)
   } catch (error) {
     console.error(error)
   }
@@ -100,6 +82,7 @@ async function main() {
 var args = process.argv.slice(2)
 console.log("hello args", args)
 // use --dry-run here
+// credit: https://stackoverflow.com/a/5767589/3015595
 
 main()
 
@@ -153,6 +136,26 @@ async function verifyTwitterCredentials(client) {
       console.log(`#️⃣  Your current follower count is ${followerCount}`)
     }
   })
+}
+
+/**
+ * Updates the location in the Twitter bio
+ * @param {{location: string}} twitterProfileParams the twitter profile parameters
+ * @returns {undefined}
+ */
+async function updateTwitterBioLocation(twitterProfileParams) {
+  // credit here: https://dev.to/deta/how-i-used-deta-and-the-twitter-api-to-update-my-profile-name-with-my-follower-count-tom-scott-style-l1j
+  return await client.post(
+    "account/update_profile",
+    twitterProfileParams,
+    (err) => {
+      if (err) {
+        console.error(err)
+        throw new Error(`❌ ERROR: Failed to update Twitter bio location.`)
+      }
+      console.log("🎉 Success! Updated Twitter bio/location")
+    }
+  )
 }
 
 /**
