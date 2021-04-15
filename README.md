@@ -24,7 +24,7 @@
 </p>
 
 <!-- TABLE OF CONTENTS -->
-<details open="open">
+<details>
   <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
   <ol>
     <li>
@@ -57,23 +57,6 @@ Node script that calculates your total monthly revenue from Stripe (using payout
 
 ---
 
-Inspired by [this tweet](https://twitter.com/yongfook/status/1373969868605644803?s=20)
-
-<img src="./images/tweet.png" alt="screenshot of tweet" width="400">
-
-<p>
-  <small>
-    <a href="https://twitter.com/yongfook/status/1373969868605644803?s=20">Link to tweet</a>
-  </small>
-</p>
-
-<p>
-  <small>
-    Image generated thanks to
-    <a href="https://tweetpik.com/yongfook/status/1373969868605644803">Tweetpik.</a>
-  </small>
-</p>
-
 ### Built With
 
 - [Node.js](https://nodejs.org/en/)
@@ -98,21 +81,11 @@ To use this script locally, make sure you have the prerequisites and then follow
 
 ### Installation
 
-1. Clone the repo
-   ```sh
-   git clone https://github.com/jsjoeio/twitter-stripe-mrr.git
-   ```
-2. Install dependencies
-   ```sh
-   yarn install
-   ```
-3. Duplicate the env.example file
-   ```sh
-   cp .env.example .env
-   ```
+1. Click "Use this template" and then clone locally
+2. `yarn`
+3. `cp .env.example .env`
 4. Add your API keys to `.env`
-5. Modify the script as needed
-6. Run script in dry-run mode (doesn't actually post to Twitter):
+5. Run script in dry-run mode (doesn't actually post to Twitter):
 
    ```sh
    yarn dryRun
@@ -121,7 +94,7 @@ To use this script locally, make sure you have the prerequisites and then follow
    node index.js --dry-run
    ```
 
-7. Run the script and post to Twitter
+6. Run the script and post to Twitter:
 
    ```sh
    yarn start
@@ -183,3 +156,20 @@ Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more informati
 - [Jake Feasel for the `kFormatter` function on Stack Overflow](https://stackoverflow.com/a/9461657/3015595)
 - [Matthew Mullin for Stripe monthly revenue help on Stack Overflow](https://stackoverflow.com/a/53775391/3015595)
 - [Leo Nagano for writing up a recap on Indie Hackers](https://www.indiehackers.com/post/mrr-progress-bar-in-profile-is-it-becoming-viral-47dcb1edad)
+
+Project inspired by [this tweet](https://twitter.com/yongfook/status/1373969868605644803?s=20)
+
+<img src="./images/tweet.png" alt="screenshot of tweet" width="400">
+
+<p>
+  <small>
+    <a href="https://twitter.com/yongfook/status/1373969868605644803?s=20">Link to tweet</a>
+  </small>
+</p>
+
+<p>
+  <small>
+    Image generated thanks to
+    <a href="https://tweetpik.com/yongfook/status/1373969868605644803">Tweetpik.</a>
+  </small>
+</p>
