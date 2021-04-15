@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dryRun": "node index.js --dry-run",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "Joe Previte",
