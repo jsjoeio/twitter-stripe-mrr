@@ -1,0 +1,27 @@
+name: Health check
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 0 0 */3 * *  says at 00:00 (midnight) every three days.
+    # https://stackoverflow.com/questions/4549542/cron-job-every-three-days/44930849
+    - cron: 0 0 */3 * *
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+      - uses: actions/checkout@v2
+
+      - name: Install Node.js v12
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+
+      - name: Install dependencies
+      - run: yarn
+
+      - name: Perform dry-run
+      - run: yarn dryRun
