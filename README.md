@@ -19,7 +19,7 @@
     ·
     <a href="https://github.com/jsjoeio/twitter-stripe-mrr/issues">Report Bug</a>
     ·
-    <a href="https://github.com/jsjoeio/twitter-stripe-mrr/issues">Request Feature</a>
+    <a href="https://github.com/jsjoeio/twitter-stripe-mrr/issues">Get Help</a>
   </p>
 </p>
 
@@ -45,7 +45,6 @@
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#help">Help</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
@@ -114,13 +113,23 @@ To use this script locally, make sure you have the prerequisites and then follow
 4. Add your API keys to `.env`
 5. Modify the script as needed
 6. Run script in dry-run mode (doesn't actually post to Twitter):
+
    ```sh
+   yarn dryRun
+
+   # or run directly
    node index.js --dry-run
    ```
+
 7. Run the script and post to Twitter
+
    ```sh
+   yarn start
+
+   # or run directly
    node index.js
    ```
+
    <!-- USAGE EXAMPLES -->
 
 ## Usage
@@ -156,13 +165,7 @@ Will look into deploying using GitHub Actions scheduler
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+See [`CONTRIBUTING`](./CONTRIBUTING.md)
 
 <!-- LICENSE -->
 
@@ -171,12 +174,6 @@ Contributions are what make the open source community such an amazing place to b
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information.
 
 <!-- CONTACT -->
-
-## Help
-
-Need help? Open an issue! Or tweet @ me [@jsjoeio](https://twitter.com/jsjoeio)
-
-<!-- ACKNOWLEDGEMENTS -->
 
 ## Acknowledgements
 
