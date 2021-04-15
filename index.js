@@ -128,7 +128,7 @@ async function main(dryRun = false) {
  */
 function getEnvironmentVariable(name) {
   if (!process.env[name]) {
-    throw new Error(`❌ ERROR: could not find ${name} in your environment.`)
+    throwErrorAndExit(`could not find ${name} in your environment.`)
   }
 
   console.log(`✅ Found ${name} in environment.`)
@@ -159,7 +159,7 @@ async function verifyTwitterCredentials(client) {
   return await client.get("account/verify_credentials", (err, res) => {
     if (err) {
       console.error(err)
-      throw new Error(`❌ ERROR: could not verify your Twitter credentials`)
+      throwErrorAndExit(`ERROR: could not verify your Twitter credentials`)
     }
     if (res) {
       const followerCount = res.followers_count
@@ -184,7 +184,7 @@ async function updateTwitterBioLocation(twitter, twitterProfileParams) {
     (err) => {
       if (err) {
         console.error(err)
-        throw new Error(`\n❌ ERROR: Failed to update Twitter bio location.`)
+        throwErrorAndExit(`\n Failed to update Twitter bio location.`)
       }
       console.log("\n🎉 Success! Updated Twitter bio/location")
     }
@@ -209,7 +209,7 @@ async function verifyStripeCredentials(client) {
     (err, res) => {
       if (err) {
         console.error(err)
-        throw new Error(`❌ ERROR: could not verify your Twitter credentials`)
+        throwErrorAndExit(`could not verify your Twitter credentials`)
       }
       if (res) {
         const { amount, currency } = res
@@ -325,7 +325,7 @@ async function getStripeRevenue(
 
 /**
  * Calculates the the total monthly amount based on a Stripe payouts list
- * @param {number}[]} payouts - list of payouts in number
+ * @param {number[]} payouts - list of payouts in number
  * @returns {number} the total
  */
 function calculateAmountTotal(payouts) {
@@ -341,6 +341,21 @@ function calculateAmountTotal(payouts) {
   return payouts.reduce((a, b) => ({
     amount: a + b,
   })).amount
+}
+
+/**
+ * Throws an error and exists script
+ * @param {string} message - the error message to throw
+ * @param {Error?} err - optional Error
+ * @returns {void}
+ */
+function throwErrorAndExit(message, err) {
+  if (err) {
+    console.error(err)
+  }
+
+  throw new Error(`❌ ERROR: ${message}`)
+  process.exit(1)
 }
 
 //////////////////////////////
