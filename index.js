@@ -1,7 +1,10 @@
 require("dotenv").config()
 const Twitter = require("twitter")
+const TelegramBot = require("node-telegram-bot-api")
 const { getUnixTime, endOfMonth, startOfMonth } = require("date-fns")
 
+const REPO_GITHUB_ACTIONS_LINK =
+  "https://github.com/jsjoeio/twitter-stripe-mrr/actions"
 const EXPECTED_ENV_VARS = [
   "TWITTER_CONSUMER_KEY",
   "TWITTER_CONSUMER_SECRET",
@@ -59,6 +62,16 @@ async function main(dryRun = false) {
       GOAL,
     ] = ACTUAL_ENV_VARS
 
+    let bot
+    const TELEGRAM_BOT_TOKEN = getEnvironmentVariable(
+      "TELEGRAM_BOT_TOKEN",
+      false
+    )
+    const TELEGRAM_CHAT_ID = getEnvironmentVariable("TELEGRAM_CHAT_ID", false)
+    if (TELEGRAM_BOT_TOKEN) {
+      bot = new TelegramBot(TELEGRAM_BOT_TOKEN)
+    }
+
     // Create the Twitter client
     const twitter = new Twitter({
       consumer_key: TWITTER_CONSUMER_KEY,
@@ -106,10 +119,50 @@ async function main(dryRun = false) {
     if (DRY_RUN_IS_ENABLED) {
       console.log(`\nLOG: Script run with --dry-run`)
       console.log(`LOG: Skipping Twitter bio/location update`)
+      sendTelegramMessage(
+        bot,
+        TELEGRAM_CHAT_ID,
+        `It's me again old sport.
+
+A dry-run of your twitter-stripe-mrr script ran with flying colors! 🚀
+
+— Efron 🤵🏻‍♂️`
+      )
       return 0
     }
 
-    await updateTwitterBioLocation(twitter, twitterProfileParams)
+    await updateTwitterBioLocation(
+      twitter,
+      twitterProfileParams,
+      () => {
+        sendTelegramMessage(
+          bot,
+          TELEGRAM_CHAT_ID,
+          `Oh dear sir, you know I don't like bad news.
+
+Something in the twitter-stripe-mrr script went terribly wrong.
+
+Here is a link  to check the logs:
+${REPO_GITHUB_ACTIONS_LINK}
+
+— Efron 🤵🏻‍♂️`
+        )
+      },
+      () => {
+        sendTelegramMessage(
+          bot,
+          TELEGRAM_CHAT_ID,
+          `Hey old sport. You like good news, eh?
+
+Reporting to you that the twitter-stripe-mrr script ran and updated your Twitter bio as requested!
+
+Here's what it used:
+${mrrIcons}
+
+— Efron 🤵🏻‍♂️`
+        )
+      }
+    )
 
     return 0
   } catch (error) {
@@ -123,11 +176,13 @@ async function main(dryRun = false) {
 
 /**
  * Grabs the environment variable based off the name
- * @param {string} name the name of the variable
+ * @param {string} name - the name of the variable
+ * @param {boolean} required - whether or not the environment variable is required. Defaults to true
  * @returns {string} the variable if it exists or throws an error
  */
-function getEnvironmentVariable(name) {
-  if (!process.env[name]) {
+function getEnvironmentVariable(name, required = true) {
+  // Don't throw for optional environment variable
+  if (required && !process.env[name]) {
     throwErrorAndExit(`could not find ${name} in your environment.`)
   }
 
@@ -174,19 +229,28 @@ async function verifyTwitterCredentials(client) {
  *
  * @param {any} twitter - the Twitter client
  * @param {{location: string}} twitterProfileParams - the twitter profile parameters
+ * @param {() => void} errCallback - callback function that's called when an error happens
+ * @param {() => void} successCallback - callback function that's called when it succeeds
  * @returns {undefined}
  */
-async function updateTwitterBioLocation(twitter, twitterProfileParams) {
+async function updateTwitterBioLocation(
+  twitter,
+  twitterProfileParams,
+  errCallback = () => {},
+  successCallback = () => {}
+) {
   // credit here: https://dev.to/deta/how-i-used-deta-and-the-twitter-api-to-update-my-profile-name-with-my-follower-count-tom-scott-style-l1j
   return await twitter.post(
     "account/update_profile",
     twitterProfileParams,
-    (err) => {
+    async (err) => {
       if (err) {
         console.error(err)
+        await errCallback()
         throwErrorAndExit(`\n Failed to update Twitter bio location.`)
       }
       console.log("\n🎉 Success! Updated Twitter bio/location")
+      await successCallback()
     }
   )
 }
@@ -356,6 +420,30 @@ function throwErrorAndExit(message, err) {
 
   throw new Error(`❌ ERROR: ${message}`)
   process.exit(1)
+}
+
+/**
+ * Sends a Telegram message
+ * @param {any} bot - the Telegram bot instance
+ * @param {string} chatId - the chatId to send the message to
+ * @param {string} message - the message to send
+ * @returns {Promise<void>} - empty Promise
+ */
+async function sendTelegramMessage(bot, chatId, message) {
+  if (bot && chatId) {
+    const success = await bot.sendMessage(chatId, message)
+    if (success) {
+      console.log(`LOG: Telegram Bot sent message, "${message}"`)
+    } else {
+      console.error(`❌ ERROR: Telegram Bot failed to send message`)
+    }
+
+    return null
+  }
+  console.warn(
+    `⚠️  WARNING: called "sendTelegramMessage" but missing bot or chatId`
+  )
+  return null
 }
 
 //////////////////////////////

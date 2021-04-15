@@ -13,6 +13,7 @@
   "dependencies": {
     "date-fns": "^2.19.0",
     "dotenv": "^8.2.0",
+    "node-telegram-bot-api": "^0.52.0",
     "stripe": "^8.139.0",
     "twitter": "^1.7.1"
   }
