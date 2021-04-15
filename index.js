@@ -8,6 +8,7 @@ const EXPECTED_ENV_VARS = [
   "TWITTER_ACCESS_TOKEN_KEY",
   "TWITTER_ACCESS_TOKEN_SECRET",
   "STRIPE_API_KEY",
+  "GOAL",
 ]
 
 let dryRun = false
@@ -55,6 +56,7 @@ async function main(dryRun = false) {
       TWITTER_ACCESS_TOKEN_KEY,
       TWITTER_ACCESS_TOKEN_SECRET,
       STRIPE_API_KEY,
+      GOAL,
     ] = ACTUAL_ENV_VARS
 
     // Create the Twitter client
@@ -87,8 +89,11 @@ async function main(dryRun = false) {
 
     // let's assume my goal is $2k
     // and there are 10 squares to fill
-    const GOAL = 2000
-    console.log(`\nLOG: Calculating MRR squares using goal of ${GOAL}\n`)
+    // this number should be something like 2000, 5000, etc.
+    const goalInThousands = parseInt(GOAL)
+    console.log(
+      `\nLOG: Calculating MRR squares using goal of ${goalInThousands}\n`
+    )
     const numOfTenRounded = ((totalRevenueForMonth / GOAL) * 10).toPrecision(1)
 
     const mrrIcons = buildMRRIconsForTwitter(numOfTenRounded, GOAL)
