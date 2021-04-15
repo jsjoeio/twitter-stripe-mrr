@@ -13,17 +13,20 @@ jobs:
 
     steps:
       - name: Checkout repo
-      - uses: actions/checkout@v2
-      # - name: Install Node.js v12
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: "12"
-      # - name: Install dependencies
-      # - run: yarn
-      # - name: Perform dry-run
-      # - run: yarn dryRun
-      #   env:
-      #     TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET}}
-      #     TWITTER_ACCESS_TOKEN_KEY: ${{ secrets.TWITTER_ACCESS_TOKEN_KEY}}
-      #     TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET}}
-      #     STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY}}
+        uses: actions/checkout@v2
+
+      - name: Install Node.js v12
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Perform dry-run
+        run: yarn dryRun
+        env:
+          TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET}}
+          TWITTER_ACCESS_TOKEN_KEY: ${{ secrets.TWITTER_ACCESS_TOKEN_KEY}}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET}}
+          STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY}}
