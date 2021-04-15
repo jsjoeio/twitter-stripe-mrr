@@ -42,7 +42,6 @@
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#deployment">Deployment</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
@@ -123,16 +122,16 @@ Here are a couple screenshots of people using this in the indie hacker space:
 
 ## Deployment
 
-(Coming soon)
+This script will run on a regular cadence (once a week on Sunday, see cron syntax in [run.yaml](.github/workflows/run.yaml)) out-of-the-box using GitHub Actions.
 
-Will look into deploying using GitHub Actions scheduler
+Assuming you clicked the "use this template", follow these steps:
 
-<!-- ROADMAP -->
+1. Add your `.env` variables to Settings > Secrets
+2. That's it!
 
-## Roadmap
+You can verify that everything is working by going to Actions > Health check > Run workflow.
 
-- [ ] Video tutorial on running project locally
-- [ ] Video tutorial on deploying the project
+This will perform a dry-run where you can double-check that everything is working correctly.
 
 <!-- CONTRIBUTING -->
 
