@@ -430,20 +430,22 @@ function throwErrorAndExit(message, err) {
  * @returns {Promise<void>} - empty Promise
  */
 async function sendTelegramMessage(bot, chatId, message) {
-  if (bot && chatId) {
-    const success = await bot.sendMessage(chatId, message)
-    if (success) {
-      console.log(`LOG: Telegram Bot sent message, "${message}"`)
+  try {
+    if (bot && chatId) {
+      const success = await bot.sendMessage(chatId, message)
+      if (success) {
+        console.log(`LOG: Telegram Bot sent message, "${message}"`)
+      }
     } else {
-      console.error(`❌ ERROR: Telegram Bot failed to send message`)
+      console.warn(
+        `⚠️  WARNING: called "sendTelegramMessage" but missing bot or chatId`
+      )
     }
-
+    return null
+  } catch (error) {
+    console.error(`❌ ERROR: Telegram Bot failed to send message`)
     return null
   }
-  console.warn(
-    `⚠️  WARNING: called "sendTelegramMessage" but missing bot or chatId`
-  )
-  return null
 }
 
 //////////////////////////////
