@@ -45,6 +45,7 @@
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
+    <li><a href="#support">Support</a></li>
   </ol>
 </details>
 
@@ -172,3 +173,8 @@ Project inspired by [this tweet](https://twitter.com/yongfook/status/13739698686
     <a href="https://tweetpik.com/yongfook/status/1373969868605644803">Tweetpik.</a>
   </small>
 </p>
+
+## Support
+
+[![ui.dev newsletter - your weekly dose of JS](/images/dose-16x1.jpg)](https://bytes.dev/?r=jsjoeio)
+Support the project by signing up for the UI.dev newsletter using [our link](https://bytes.dev/?r=jsjoeio)!
