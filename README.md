@@ -127,7 +127,7 @@ This script will run on a regular cadence (once a week on Sunday, see cron synta
 
 Assuming you clicked the "use this template", follow these steps:
 
-1. Add your `.env` variables to Settings > Secrets
+1. Add your `.env` variables to Settings > Secrets and ensure Actions are enabled.
 2. That's it!
 
 You can verify that everything is working by going to Actions > Health check > Run workflow.
