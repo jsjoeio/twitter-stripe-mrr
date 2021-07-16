@@ -341,13 +341,13 @@ async function getStripeRevenue(
   endRangeTimestamp
 ) {
   // credit here: https://stackoverflow.com/a/53775391/3015595
-  const payoutsInCents = await stripe.payouts.list({
+  const paymentIntentsInCents = await stripe.paymentIntents.list({
     created: { gte: startRangeTimestamp, lte: endRangeTimestamp },
     limit: 100, // Maximum limit (10 is default)
   })
 
-  if (!payoutsInCents) {
-    console.log(`LOG: payoutsInCents`, payoutsInCents)
+  if (!paymentIntentsInCents) {
+    console.log(`LOG: paymentIntentsInCents`, paymentIntentsInCents)
     console.error(
       `❌ ERROR: either couldn't get payouts from Stripe or none found for this date range`
     )
@@ -360,26 +360,26 @@ async function getStripeRevenue(
     return 0
   }
 
-  // payouts returned by Stripe API are in cents, so we divide by 100
-  const payouts = payoutsInCents.data.map((payout) => {
-    return payout.amount / 100
-  })
+  // paymentIntents returned by Stripe API are in cents, so we divide by 100
+  const paymentIntents = paymentIntentsInCents.data
+    .filter((paymentIntent) => paymentIntent.status === "succeeded")
+    .map((paymentIntent) => {
+      return paymentIntent.amount / 100
+    })
 
-  if (!payouts) {
+  if (!paymentIntents) {
     console.error(
-      `❌ ERROR: Something went wrong converting the payoutsInCents to dollars`
+      `❌ ERROR: Something went wrong converting the paymentIntentsInCents to dollars`
     )
-    console.log(`LOG: payoutsInCents`, payoutsInCents)
-    console.log(`LOG: payouts`, payouts)
+    console.log(`LOG: paymentIntents`, paymentIntents)
     return 0
   }
 
-  const amountTotal = calculateAmountTotal(payouts)
+  const amountTotal = calculateAmountTotal(paymentIntents)
 
   if (!amountTotal) {
     console.error(`❌ ERROR: Something went wrong calculating the total amount`)
-    console.log(`LOG: payoutsInCents`, payoutsInCents)
-    console.log(`LOG: payouts`, payouts)
+    console.log(`LOG: paymentIntentsInCents`, paymentIntentsInCents)
     console.log(`LOG: amountTotal`, amountTotal)
     return 0
   }
@@ -388,23 +388,21 @@ async function getStripeRevenue(
 }
 
 /**
- * Calculates the the total monthly amount based on a Stripe payouts list
- * @param {number[]} payouts - list of payouts in number
+ * Calculates the the total monthly amount based on a Stripe paymentIntents list
+ * @param {number[]} paymentIntents - list of paymentIntents in number
  * @returns {number} the total
  */
-function calculateAmountTotal(payouts) {
-  if (payouts.length === 0) {
+function calculateAmountTotal(paymentIntents) {
+  if (paymentIntents.length === 0) {
     return 0
   }
 
   // Some months there may have one payout
-  if (payouts.length === 1) {
-    return payouts[0]
+  if (paymentIntents.length === 1) {
+    return paymentIntents[0]
   }
 
-  return payouts.reduce((a, b) => ({
-    amount: a + b,
-  })).amount
+  return paymentIntents.reduce((a, b) => a + b)
 }
 
 /**
