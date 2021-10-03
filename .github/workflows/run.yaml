@@ -2,9 +2,9 @@ name: Run script
 
 on:
   workflow_dispatch:
-  schedule:
+  # schedule:
     # Every Sunday around 12pm
-    - cron: "0 17 * * 0"
+    # - cron: "0 17 * * 0"
 
 jobs:
   run:
