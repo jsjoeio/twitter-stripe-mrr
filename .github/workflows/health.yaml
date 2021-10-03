@@ -2,10 +2,10 @@ name: Health check
 
 on:
   workflow_dispatch:
-  schedule:
+#   schedule:
     # 0 0 */3 * *  says at 00:00 (midnight) every three days.
     # https://stackoverflow.com/questions/4549542/cron-job-every-three-days/44930849
-    - cron: 0 0 */3 * *
+#    - cron: 0 0 */3 * *
 
 jobs:
   dryRun:
